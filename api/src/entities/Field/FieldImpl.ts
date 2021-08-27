@@ -1,6 +1,6 @@
 import { FieldInterface } from "./FieldInterface";
 import { Bomb } from "../Bomb/Bomb";
-import { BombProximityIndicator } from "../BombProximity/BombProximityIndicator";
+import { BombProximityIndicator } from "../BombProximityIndicator/BombProximityIndicator";
 import { CellInterface } from "../Cell/CellInterface";
 import { RandomIntUtil } from "../Utils/RandomIntGen";
 
@@ -128,5 +128,39 @@ export class Field implements FieldInterface {
     }
 
     return result;
+  }
+
+  public toString(): string {
+    const bombs = this.getBombs();
+    const indicators = this.getBombProximityIndicators();
+
+    const fieldRep = [] as string[][];
+    for (let i = 0; i < this.height; i++) {
+      fieldRep.push([] as string[]);
+      for (let j = 0; j < this.width; j++) {
+        fieldRep[i].push(".");
+      }
+    }
+
+    for (const bomb of bombs) {
+      fieldRep[bomb.getYAxis()][bomb.getXAxis()] = "X";
+    }
+    for (const indicator of indicators) {
+      fieldRep[indicator.getYAxis()][
+        indicator.getXAxis()
+      ] = `${indicator.getBombCounter()}`;
+    }
+
+    let res = "";
+    for (const list of fieldRep) {
+      let line = "";
+      for (const el of list) {
+        line += el + "    ";
+      }
+      line += "\n\n";
+      res += line;
+    }
+
+    return res;
   }
 }
