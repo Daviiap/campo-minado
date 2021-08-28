@@ -1,13 +1,13 @@
 import { FieldInterface } from "./FieldInterface";
 import { Bomb } from "../Bomb/Bomb";
 import { BombProximityIndicator } from "../BombProximityIndicator/BombProximityIndicator";
-import { CellInterface } from "../Cell/CellInterface";
 import { RandomIntUtil } from "../Utils/RandomIntGen";
+import { Cell } from "../Cell/Cell";
 
 export class Field implements FieldInterface {
   private width: number;
   private height: number;
-  private cells: CellInterface[];
+  private cells: Cell[];
 
   public constructor(width: number, height: number, numberOfBombs: number) {
     this.width = width;
@@ -22,35 +22,12 @@ export class Field implements FieldInterface {
       const yAxis = RandomIntUtil.getRandomInt(0, this.height);
 
       if (!this.hasBomb(xAxis, yAxis)) {
-        const newBomb: Bomb = new Bomb(xAxis, yAxis);
-        this.cells.push(newBomb);
+        const newCell: Cell = new Cell(xAxis, yAxis, new Bomb());
+        this.cells.push(newCell);
         this.putBombs(--numberOfBombs);
-        this.putBombProximityIndicators(newBomb);
+        this.putBombProximityIndicators(xAxis, yAxis);
       } else {
         this.putBombs(numberOfBombs);
-      }
-    }
-  }
-
-  private putBombProximityIndicators(bomb: Bomb): void {
-    for (let x = bomb.getXAxis() - 1; x <= bomb.getXAxis() + 1; x++) {
-      for (let y = bomb.getYAxis() - 1; y <= bomb.getYAxis() + 1; y++) {
-        if (
-          !this.hasBomb(x, y) &&
-          x >= 0 &&
-          x < this.width &&
-          y >= 0 &&
-          y < this.height
-        ) {
-          const bombProximityIndicator =
-            this.getBombProximityIndicator(x, y) ||
-            new BombProximityIndicator(x, y);
-
-          bombProximityIndicator.incrementBombCounter();
-          if (!this.hasBombProximityIndicator(x, y)) {
-            this.cells.push(bombProximityIndicator);
-          }
-        }
       }
     }
   }
@@ -59,7 +36,7 @@ export class Field implements FieldInterface {
     let hasBomb = false;
     for (const cell of this.cells) {
       if (
-        cell instanceof Bomb &&
+        cell.getContentType() === "bomb" &&
         cell.getXAxis() === xAxis &&
         cell.getYAxis() === yAxis
       ) {
@@ -71,11 +48,35 @@ export class Field implements FieldInterface {
     return hasBomb;
   }
 
+  private putBombProximityIndicators(xAxis: number, yAxis: number): void {
+    for (let x = xAxis - 1; x <= xAxis + 1; x++) {
+      for (let y = yAxis - 1; y <= yAxis + 1; y++) {
+        if (
+          !this.hasBomb(x, y) &&
+          x >= 0 &&
+          x < this.width &&
+          y >= 0 &&
+          y < this.height
+        ) {
+          const bombProximityIndicator =
+            this.getBombProximityIndicator(x, y) ||
+            new BombProximityIndicator();
+
+          bombProximityIndicator.incrementBombCounter();
+          if (!this.hasBombProximityIndicator(x, y)) {
+            const newCell = new Cell(x, y, bombProximityIndicator);
+            this.cells.push(newCell);
+          }
+        }
+      }
+    }
+  }
+
   private hasBombProximityIndicator(xAxis: number, yAxis: number): boolean {
     let hasBomb = false;
     for (const cell of this.cells) {
       if (
-        cell instanceof BombProximityIndicator &&
+        cell.getContentType() === "bombIndicator" &&
         cell.getXAxis() === xAxis &&
         cell.getYAxis() === yAxis
       ) {
@@ -94,11 +95,11 @@ export class Field implements FieldInterface {
     let bombProximityIndicator: BombProximityIndicator | null = null;
     for (const cell of this.cells) {
       if (
-        cell instanceof BombProximityIndicator &&
+        cell.getContentType() === "bombProximityIndicator" &&
         cell.getXAxis() === xAxis &&
         cell.getYAxis() === yAxis
       ) {
-        bombProximityIndicator = cell as BombProximityIndicator;
+        bombProximityIndicator = cell.getContent() as BombProximityIndicator;
         break;
       }
     }
@@ -106,12 +107,29 @@ export class Field implements FieldInterface {
     return bombProximityIndicator;
   }
 
+  private getCell(xAxis: number, yAxis: number): Cell | null {
+    let returnedCell: Cell | null = null;
+
+    for (const cell of this.cells) {
+      if (cell.getXAxis() === xAxis && cell.getYAxis() === yAxis) {
+        returnedCell = cell;
+
+      }
+    }
+
+    return returnedCell;
+  }
+
+  public getCells(): Cell[] {
+    return this.cells as Cell[];
+  }
+
   public getBombs(): Bomb[] {
     const result = [] as Bomb[];
 
     for (const cell of this.cells) {
-      if (cell instanceof Bomb) {
-        result.push(cell);
+      if (cell.getContentType() === "bomb") {
+        result.push(cell.getContent() as Bomb);
       }
     }
 
@@ -122,18 +140,30 @@ export class Field implements FieldInterface {
     const result = [] as BombProximityIndicator[];
 
     for (const cell of this.cells) {
-      if (cell instanceof BombProximityIndicator) {
-        result.push(cell);
+      if (cell.getContentType() === "bombProximityIndicator") {
+        result.push(cell.getContent() as BombProximityIndicator);
       }
     }
 
     return result;
   }
 
-  public toString(): string {
-    const bombs = this.getBombs();
-    const indicators = this.getBombProximityIndicators();
+  public putRemoveBombFlag(xAxis: number, yAxis: number): void {
+    const cell = this.getCell(xAxis, yAxis);
+    if (cell) {
+      if (cell.getContentType() != 'void') {
+        cell.changeBombFlag();
+      } else {
+        this.cells = this.cells.filter(cell => cell.getXAxis() != xAxis && cell.getYAxis() != yAxis);
+      }
+    } else {
+      const newCell = new Cell(xAxis, yAxis, null);
+      newCell.changeBombFlag();
+      this.cells.push(newCell);
+    }
+  }
 
+  public toString(): string {
     const fieldRep = [] as string[][];
     for (let i = 0; i < this.height; i++) {
       fieldRep.push([] as string[]);
@@ -142,13 +172,16 @@ export class Field implements FieldInterface {
       }
     }
 
-    for (const bomb of bombs) {
-      fieldRep[bomb.getYAxis()][bomb.getXAxis()] = "X";
-    }
-    for (const indicator of indicators) {
-      fieldRep[indicator.getYAxis()][
-        indicator.getXAxis()
-      ] = `${indicator.getBombCounter()}`;
+    for (const cell of this.cells) {
+      if (cell.hasBombFlag()) {
+        fieldRep[cell.getYAxis()][cell.getXAxis()] = "F";
+      } else if (cell.getContentType() === "bomb") {
+        fieldRep[cell.getYAxis()][cell.getXAxis()] = "B";
+      } else if (cell.getContentType() === "bombProximityIndicator") {
+        fieldRep[cell.getYAxis()][
+          cell.getXAxis()
+        ] = `${(cell.getContent() as BombProximityIndicator).getBombCounter()}`;
+      }
     }
 
     let res = "";

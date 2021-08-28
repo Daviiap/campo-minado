@@ -1,4 +1,4 @@
-import { Field } from "./entities/Field/FieldImpl";
+import { Field } from "./entities/Field/Field";
 
 const height = 16;
 const width = 16;

@@ -1,13 +1,9 @@
 import { BombProximityIndicatorInterface } from "./BombProximityIndicatorInterface";
 
 export class BombProximityIndicator implements BombProximityIndicatorInterface {
-  private xAxis: number;
-  private yAxis: number;
   private bombCounter: number;
 
-  public constructor(xAxis: number, yAxis: number) {
-    this.xAxis = xAxis;
-    this.yAxis = yAxis;
+  public constructor() {
     this.bombCounter = 0;
   }
 
@@ -19,11 +15,7 @@ export class BombProximityIndicator implements BombProximityIndicatorInterface {
     return this.bombCounter;
   }
 
-  public getXAxis(): number {
-    return this.xAxis;
-  }
-
-  public getYAxis(): number {
-    return this.yAxis;
+  public getType(): string {
+    return 'bombProximityIndicator';
   }
 }

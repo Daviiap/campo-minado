@@ -1,5 +1,5 @@
-import { CellInterface } from "../Cell/CellInterface";
+import { CellContentInterface } from "../CellContent/CellContentInterface";
 
-export interface BombInterface extends CellInterface {
+export interface BombInterface extends CellContentInterface {
   
 }

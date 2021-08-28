@@ -1,6 +1,6 @@
-import { CellInterface } from "../Cell/CellInterface";
+import { CellContentInterface } from "../CellContent/CellContentInterface";
 
-export interface BombProximityIndicatorInterface extends CellInterface {
+export interface BombProximityIndicatorInterface extends CellContentInterface {
   incrementBombCounter(): void;
   getBombCounter(): number;
 }
