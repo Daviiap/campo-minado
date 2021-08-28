@@ -2,24 +2,36 @@ import { CellContentInterface } from "../CellContent/CellContentInterface";
 import { CellInterface } from "./CellInterface";
 
 export class Cell implements CellInterface {
-    private xAxis: number;
-    private yAxis: number;
     private content: CellContentInterface | null;
     private bombFlag: boolean;
+    private hidden: boolean;
 
-    public constructor(xAxis: number, yAxis: number, content: CellContentInterface | null) {
-        this.xAxis = xAxis;
-        this.yAxis = yAxis;
+    public constructor(content: CellContentInterface | null = null) {
         this.content = content;
         this.bombFlag = false;
+        this.hidden = true;
     }
 
     public hasBombFlag(): boolean {
         return this.bombFlag;
     }
 
+    public insertContent(content: CellContentInterface): void {
+        if (!this.content) {
+            this.content = content;
+        }
+    }
+
     public changeBombFlag(): void {
         this.bombFlag = !this.bombFlag;
+    }
+
+    public unHide(): void {
+        this.hidden = false;
+    }
+
+    public isHidden(): boolean {
+        return this.hidden;
     }
 
     public getContent(): CellContentInterface | null {
@@ -29,12 +41,4 @@ export class Cell implements CellInterface {
     public getContentType(): string {
         return this.content ? this.content.getType() : 'void';
     }
-
-    public getXAxis(): number {
-        return this.xAxis;
-    }
-    public getYAxis(): number {
-        return this.yAxis;
-    }
-
 }

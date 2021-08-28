@@ -1,10 +1,11 @@
 import { CellContentInterface } from '../CellContent/CellContentInterface';
 
 export interface CellInterface {
-  getContent(): CellContentInterface | null
+  getContent(): CellContentInterface | null;
+  insertContent(content: CellContentInterface): void;
   getContentType(): string;
   hasBombFlag(): boolean;
   changeBombFlag(): void;
-  getXAxis(): number;
-  getYAxis(): number;
+  isHidden(): boolean;
+  unHide(): void;
 }

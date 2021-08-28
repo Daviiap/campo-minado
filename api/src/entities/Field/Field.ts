@@ -3,17 +3,30 @@ import { Bomb } from "../Bomb/Bomb";
 import { BombProximityIndicator } from "../BombProximityIndicator/BombProximityIndicator";
 import { RandomIntUtil } from "../Utils/RandomIntGen";
 import { Cell } from "../Cell/Cell";
+import { CellContentInterface } from "../CellContent/CellContentInterface";
 
 export class Field implements FieldInterface {
   private width: number;
   private height: number;
-  private cells: Cell[];
+  private cells: Cell[][];
 
   public constructor(width: number, height: number, numberOfBombs: number) {
     this.width = width;
     this.height = height;
-    this.cells = [];
+    this.cells = this.makeField();
     this.putBombs(numberOfBombs);
+  }
+
+  private makeField(): Cell[][] {
+    const field = [] as Cell[][];
+    for (let i = 0; i < this.height; i++) {
+      field.push([] as Cell[]);
+      for (let j = 0; j < this.width; j++) {
+        field[i].push(new Cell());
+      }
+    }
+
+    return field;
   }
 
   private putBombs(numberOfBombs: number): void {
@@ -21,9 +34,9 @@ export class Field implements FieldInterface {
       const xAxis = RandomIntUtil.getRandomInt(0, this.width);
       const yAxis = RandomIntUtil.getRandomInt(0, this.height);
 
-      if (!this.hasBomb(xAxis, yAxis)) {
-        const newCell: Cell = new Cell(xAxis, yAxis, new Bomb());
-        this.cells.push(newCell);
+      if (this.areCordinatesValid(xAxis, yAxis) && !this.hasBomb(xAxis, yAxis)) {
+        const newBomb = new Bomb();
+        this.cells[yAxis][xAxis].insertContent(newBomb);
         this.putBombs(--numberOfBombs);
         this.putBombProximityIndicators(xAxis, yAxis);
       } else {
@@ -33,30 +46,15 @@ export class Field implements FieldInterface {
   }
 
   private hasBomb(xAxis: number, yAxis: number): boolean {
-    let hasBomb = false;
-    for (const cell of this.cells) {
-      if (
-        cell.getContentType() === "bomb" &&
-        cell.getXAxis() === xAxis &&
-        cell.getYAxis() === yAxis
-      ) {
-        hasBomb = true;
-        break;
-      }
-    }
-
-    return hasBomb;
+    return this.areCordinatesValid(xAxis, yAxis) && this.cells[yAxis][xAxis].getContentType() === 'bomb';
   }
 
   private putBombProximityIndicators(xAxis: number, yAxis: number): void {
     for (let x = xAxis - 1; x <= xAxis + 1; x++) {
       for (let y = yAxis - 1; y <= yAxis + 1; y++) {
         if (
-          !this.hasBomb(x, y) &&
-          x >= 0 &&
-          x < this.width &&
-          y >= 0 &&
-          y < this.height
+          this.areCordinatesValid(x, y) &&
+          !this.hasBomb(x, y)
         ) {
           const bombProximityIndicator =
             this.getBombProximityIndicator(x, y) ||
@@ -64,8 +62,7 @@ export class Field implements FieldInterface {
 
           bombProximityIndicator.incrementBombCounter();
           if (!this.hasBombProximityIndicator(x, y)) {
-            const newCell = new Cell(x, y, bombProximityIndicator);
-            this.cells.push(newCell);
+            this.cells[y][x].insertContent(bombProximityIndicator);
           }
         }
       }
@@ -73,94 +70,62 @@ export class Field implements FieldInterface {
   }
 
   private hasBombProximityIndicator(xAxis: number, yAxis: number): boolean {
-    let hasBomb = false;
-    for (const cell of this.cells) {
-      if (
-        cell.getContentType() === "bombIndicator" &&
-        cell.getXAxis() === xAxis &&
-        cell.getYAxis() === yAxis
-      ) {
-        hasBomb = true;
-        break;
-      }
-    }
-
-    return hasBomb;
+    return this.areCordinatesValid(xAxis, yAxis) && this.cells[yAxis][xAxis].getContentType() === 'bombProximityIndicator';
   }
 
   private getBombProximityIndicator(
     xAxis: number,
     yAxis: number
   ): BombProximityIndicator | null {
-    let bombProximityIndicator: BombProximityIndicator | null = null;
-    for (const cell of this.cells) {
-      if (
-        cell.getContentType() === "bombProximityIndicator" &&
-        cell.getXAxis() === xAxis &&
-        cell.getYAxis() === yAxis
-      ) {
-        bombProximityIndicator = cell.getContent() as BombProximityIndicator;
-        break;
+    let response = null;
+    if (this.areCordinatesValid(xAxis, yAxis)) {
+      const cell = this.cells[yAxis][xAxis];
+      if (cell.getContentType() === 'bombProximityIndicator') {
+        response = cell.getContent() as BombProximityIndicator;
       }
+    } else {
+      throw new Error();
     }
-
-    return bombProximityIndicator;
+    return response;
   }
 
-  private getCell(xAxis: number, yAxis: number): Cell | null {
-    let returnedCell: Cell | null = null;
-
-    for (const cell of this.cells) {
-      if (cell.getXAxis() === xAxis && cell.getYAxis() === yAxis) {
-        returnedCell = cell;
-
-      }
+  private getCell(xAxis: number, yAxis: number): Cell {
+    if (this.areCordinatesValid(xAxis, yAxis)) {
+      return this.cells[yAxis][xAxis];
+    } else {
+      throw new Error();
     }
-
-    return returnedCell;
   }
 
-  public getCells(): Cell[] {
-    return this.cells as Cell[];
-  }
-
-  public getBombs(): Bomb[] {
-    const result = [] as Bomb[];
-
-    for (const cell of this.cells) {
-      if (cell.getContentType() === "bomb") {
-        result.push(cell.getContent() as Bomb);
-      }
-    }
-
-    return result;
-  }
-
-  public getBombProximityIndicators(): BombProximityIndicator[] {
-    const result = [] as BombProximityIndicator[];
-
-    for (const cell of this.cells) {
-      if (cell.getContentType() === "bombProximityIndicator") {
-        result.push(cell.getContent() as BombProximityIndicator);
-      }
-    }
-
-    return result;
+  private areCordinatesValid(xAxis: number, yAxis: number): boolean {
+    return xAxis >= 0 && xAxis < this.width && yAxis >= 0 && yAxis < this.height;
   }
 
   public putRemoveBombFlag(xAxis: number, yAxis: number): void {
-    const cell = this.getCell(xAxis, yAxis);
-    if (cell) {
-      if (cell.getContentType() != 'void') {
-        cell.changeBombFlag();
-      } else {
-        this.cells = this.cells.filter(cell => cell.getXAxis() != xAxis && cell.getYAxis() != yAxis);
-      }
+    if (this.areCordinatesValid(xAxis, yAxis)) {
+      const cell = this.getCell(xAxis, yAxis);
+      cell.changeBombFlag();
     } else {
-      const newCell = new Cell(xAxis, yAxis, null);
-      newCell.changeBombFlag();
-      this.cells.push(newCell);
+      throw new Error();
     }
+  }
+
+  public unHiddeCell(xAxis: number, yAxis: number): string {
+    if (this.areCordinatesValid(xAxis, yAxis)) {
+      const cell = this.getCell(xAxis, yAxis);
+      cell.unHide();
+      return cell.getContentType();
+    } else {
+      throw new Error();
+    }
+  }
+
+  public getWidth(): number {
+    return this.width;
+  }
+
+  public getHeight(): number {
+    return this.height;
   }
 
   public toString(): string {
@@ -172,15 +137,16 @@ export class Field implements FieldInterface {
       }
     }
 
-    for (const cell of this.cells) {
-      if (cell.hasBombFlag()) {
-        fieldRep[cell.getYAxis()][cell.getXAxis()] = "F";
-      } else if (cell.getContentType() === "bomb") {
-        fieldRep[cell.getYAxis()][cell.getXAxis()] = "B";
-      } else if (cell.getContentType() === "bombProximityIndicator") {
-        fieldRep[cell.getYAxis()][
-          cell.getXAxis()
-        ] = `${(cell.getContent() as BombProximityIndicator).getBombCounter()}`;
+    for (let i = 0; i < this.cells.length; i++) {
+      for (let j = 0; j < this.cells[i].length; j++) {
+        const cell = this.cells[i][j];
+        if (cell.hasBombFlag()) {
+          fieldRep[i][j] = "F";
+        } else if (cell.getContentType() === "bomb") {
+          fieldRep[i][j] = "B";
+        } else if (cell.getContentType() === "bombProximityIndicator") {
+          fieldRep[i][j] = `${(cell.getContent() as BombProximityIndicator).getBombCounter()}`;
+        }
       }
     }
 
