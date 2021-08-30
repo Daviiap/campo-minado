@@ -3,7 +3,6 @@ import { Bomb } from "../Bomb/Bomb";
 import { BombProximityIndicator } from "../BombProximityIndicator/BombProximityIndicator";
 import { RandomIntUtil } from "../Utils/RandomIntGen";
 import { Cell } from "../Cell/Cell";
-import { CellContentInterface } from "../CellContent/CellContentInterface";
 
 export class Field implements FieldInterface {
   private width: number;
@@ -101,6 +100,27 @@ export class Field implements FieldInterface {
     return xAxis >= 0 && xAxis < this.width && yAxis >= 0 && yAxis < this.height;
   }
 
+  private recursiveUnhiddeCell(xAxis: number, yAxis: number): void {
+    if (this.areCordinatesValid(xAxis, yAxis)) {
+      const cell = this.getCell(xAxis, yAxis);
+      cell.unHide();
+      if (cell.getContentType() === 'void') {
+        for (let y = yAxis - 1; y <= yAxis + 1; y++) {
+          for (let x = xAxis - 1; x <= xAxis + 1; x++) {
+            if (this.areCordinatesValid(x, y) && (x !== xAxis || y !== yAxis)) {
+              const c = this.cells[y][x];
+              if (c.isHidden()) {
+                this.recursiveUnhiddeCell(x, y);
+              }
+            }
+          }
+        }
+      }
+    } else {
+      throw new Error();
+    }
+  }
+
   public putRemoveBombFlag(xAxis: number, yAxis: number): void {
     if (this.areCordinatesValid(xAxis, yAxis)) {
       const cell = this.getCell(xAxis, yAxis);
@@ -111,13 +131,13 @@ export class Field implements FieldInterface {
   }
 
   public unHiddeCell(xAxis: number, yAxis: number): string {
-    if (this.areCordinatesValid(xAxis, yAxis)) {
-      const cell = this.getCell(xAxis, yAxis);
-      cell.unHide();
-      return cell.getContentType();
-    } else {
-      throw new Error();
+    const cell = this.getCell(xAxis, yAxis);
+
+    if (!cell.hasBombFlag()) {
+      this.recursiveUnhiddeCell(xAxis, yAxis);
     }
+
+    return cell.hasBombFlag() ? 'flag' : cell.getContentType();
   }
 
   public getWidth(): number {
@@ -140,12 +160,16 @@ export class Field implements FieldInterface {
     for (let i = 0; i < this.cells.length; i++) {
       for (let j = 0; j < this.cells[i].length; j++) {
         const cell = this.cells[i][j];
-        if (cell.hasBombFlag()) {
-          fieldRep[i][j] = "F";
-        } else if (cell.getContentType() === "bomb") {
-          fieldRep[i][j] = "B";
-        } else if (cell.getContentType() === "bombProximityIndicator") {
-          fieldRep[i][j] = `${(cell.getContent() as BombProximityIndicator).getBombCounter()}`;
+        if (cell.isHidden()) {
+          fieldRep[i][j] = "*";
+        } else {
+          if (cell.hasBombFlag()) {
+            fieldRep[i][j] = "F";
+          } else if (cell.getContentType() === "bomb") {
+            fieldRep[i][j] = "B";
+          } else if (cell.getContentType() === "bombProximityIndicator") {
+            fieldRep[i][j] = `${(cell.getContent() as BombProximityIndicator).getBombCounter()}`;
+          }
         }
       }
     }
