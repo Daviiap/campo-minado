@@ -130,7 +130,7 @@ export class Field implements FieldInterface {
     if (this.areCordinatesValid(xAxis, yAxis)) {
       const cell = this.getCell(xAxis, yAxis);
 
-      if (!cell.hasBombFlag()) {
+      if (cell.isHidden() && !cell.hasBombFlag()) {
         this.recursiveUnhiddeCell(xAxis, yAxis);
       }
 
