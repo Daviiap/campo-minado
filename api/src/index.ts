@@ -5,12 +5,8 @@ const width = 16;
 const numberOfBombs = 40;
 const field = new Field(width, height, numberOfBombs);
 
-const start = new Date().getTime();
-
-field.unHiddeCell(8, 4);
-
-const end = new Date().getTime();
-
-console.log(end - start);
+field.unHiddeCell(0,0);
+field.unHiddeCell(10, 7);
+field.unHiddeCell(8, 7);
 
 console.log(field.toString());

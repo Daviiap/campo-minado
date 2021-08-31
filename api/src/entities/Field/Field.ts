@@ -101,27 +101,23 @@ export class Field implements FieldInterface {
   }
 
   private recursiveUnhiddeCell(xAxis: number, yAxis: number): void {
-    if (this.areCordinatesValid(xAxis, yAxis)) {
-      const cell = this.getCell(xAxis, yAxis);
-      cell.unHide();
-      if (cell.getContentType() === 'void') {
-        for (let y = yAxis - 1; y <= yAxis + 1; y++) {
-          for (let x = xAxis - 1; x <= xAxis + 1; x++) {
-            if (this.areCordinatesValid(x, y) && (x !== xAxis || y !== yAxis)) {
-              const c = this.cells[y][x];
-              if (c.isHidden()) {
-                this.recursiveUnhiddeCell(x, y);
-              }
+    const cell = this.getCell(xAxis, yAxis);
+    cell.unHide();
+    if (cell.getContentType() === 'void') {
+      for (let y = yAxis - 1; y <= yAxis + 1; y++) {
+        for (let x = xAxis - 1; x <= xAxis + 1; x++) {
+          if (this.areCordinatesValid(x, y) && (x !== xAxis || y !== yAxis)) {
+            const c = this.cells[y][x];
+            if (c.isHidden()) {
+              this.recursiveUnhiddeCell(x, y);
             }
           }
         }
       }
-    } else {
-      throw new Error();
     }
   }
 
-  public putRemoveBombFlag(xAxis: number, yAxis: number): void {
+  public putAndRemoveBombFlag(xAxis: number, yAxis: number): void {
     if (this.areCordinatesValid(xAxis, yAxis)) {
       const cell = this.getCell(xAxis, yAxis);
       cell.changeBombFlag();
@@ -131,13 +127,17 @@ export class Field implements FieldInterface {
   }
 
   public unHiddeCell(xAxis: number, yAxis: number): string {
-    const cell = this.getCell(xAxis, yAxis);
+    if (this.areCordinatesValid(xAxis, yAxis)) {
+      const cell = this.getCell(xAxis, yAxis);
 
-    if (!cell.hasBombFlag()) {
-      this.recursiveUnhiddeCell(xAxis, yAxis);
+      if (!cell.hasBombFlag()) {
+        this.recursiveUnhiddeCell(xAxis, yAxis);
+      }
+
+      return cell.hasBombFlag() ? 'flag' : cell.getContentType();
+    } else {
+      throw new Error();
     }
-
-    return cell.hasBombFlag() ? 'flag' : cell.getContentType();
   }
 
   public getWidth(): number {
@@ -153,7 +153,7 @@ export class Field implements FieldInterface {
     for (let i = 0; i < this.height; i++) {
       fieldRep.push([] as string[]);
       for (let j = 0; j < this.width; j++) {
-        fieldRep[i].push(".");
+        fieldRep[i].push(" ");
       }
     }
 
