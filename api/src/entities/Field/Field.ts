@@ -33,7 +33,7 @@ export class Field implements FieldInterface {
       const xAxis = RandomIntUtil.getRandomInt(0, this.width);
       const yAxis = RandomIntUtil.getRandomInt(0, this.height);
 
-      if (this.areCordinatesValid(xAxis, yAxis) && !this.hasBomb(xAxis, yAxis)) {
+      if (this.areCoordinatesValid(xAxis, yAxis) && !this.hasBomb(xAxis, yAxis)) {
         const newBomb = new Bomb();
         this.cells[yAxis][xAxis].insertContent(newBomb);
         this.putBombs(--numberOfBombs);
@@ -45,14 +45,14 @@ export class Field implements FieldInterface {
   }
 
   private hasBomb(xAxis: number, yAxis: number): boolean {
-    return this.areCordinatesValid(xAxis, yAxis) && this.cells[yAxis][xAxis].getContentType() === 'bomb';
+    return this.areCoordinatesValid(xAxis, yAxis) && this.cells[yAxis][xAxis].getContentType() === 'bomb';
   }
 
   private putBombProximityIndicators(xAxis: number, yAxis: number): void {
     for (let x = xAxis - 1; x <= xAxis + 1; x++) {
       for (let y = yAxis - 1; y <= yAxis + 1; y++) {
         if (
-          this.areCordinatesValid(x, y) &&
+          this.areCoordinatesValid(x, y) &&
           !this.hasBomb(x, y)
         ) {
           const bombProximityIndicator =
@@ -69,7 +69,7 @@ export class Field implements FieldInterface {
   }
 
   private hasBombProximityIndicator(xAxis: number, yAxis: number): boolean {
-    return this.areCordinatesValid(xAxis, yAxis) && this.cells[yAxis][xAxis].getContentType() === 'bombProximityIndicator';
+    return this.areCoordinatesValid(xAxis, yAxis) && this.cells[yAxis][xAxis].getContentType() === 'bombProximityIndicator';
   }
 
   private getBombProximityIndicator(
@@ -77,7 +77,7 @@ export class Field implements FieldInterface {
     yAxis: number
   ): BombProximityIndicator | null {
     let response = null;
-    if (this.areCordinatesValid(xAxis, yAxis)) {
+    if (this.areCoordinatesValid(xAxis, yAxis)) {
       const cell = this.cells[yAxis][xAxis];
       if (cell.getContentType() === 'bombProximityIndicator') {
         response = cell.getContent() as BombProximityIndicator;
@@ -89,27 +89,27 @@ export class Field implements FieldInterface {
   }
 
   private getCell(xAxis: number, yAxis: number): Cell {
-    if (this.areCordinatesValid(xAxis, yAxis)) {
+    if (this.areCoordinatesValid(xAxis, yAxis)) {
       return this.cells[yAxis][xAxis];
     } else {
       throw new Error();
     }
   }
 
-  private areCordinatesValid(xAxis: number, yAxis: number): boolean {
+  private areCoordinatesValid(xAxis: number, yAxis: number): boolean {
     return xAxis >= 0 && xAxis < this.width && yAxis >= 0 && yAxis < this.height;
   }
 
-  private recursiveUnhiddeCell(xAxis: number, yAxis: number): void {
+  private recursiveUnHideCell(xAxis: number, yAxis: number): void {
     const cell = this.getCell(xAxis, yAxis);
     cell.unHide();
     if (cell.getContentType() === 'void') {
       for (let y = yAxis - 1; y <= yAxis + 1; y++) {
         for (let x = xAxis - 1; x <= xAxis + 1; x++) {
-          if (this.areCordinatesValid(x, y) && (x !== xAxis || y !== yAxis)) {
+          if (this.areCoordinatesValid(x, y) && (x !== xAxis || y !== yAxis)) {
             const c = this.cells[y][x];
             if (c.isHidden()) {
-              this.recursiveUnhiddeCell(x, y);
+              this.recursiveUnHideCell(x, y);
             }
           }
         }
@@ -118,7 +118,7 @@ export class Field implements FieldInterface {
   }
 
   public putAndRemoveBombFlag(xAxis: number, yAxis: number): void {
-    if (this.areCordinatesValid(xAxis, yAxis)) {
+    if (this.areCoordinatesValid(xAxis, yAxis)) {
       const cell = this.getCell(xAxis, yAxis);
       cell.changeBombFlag();
     } else {
@@ -126,12 +126,12 @@ export class Field implements FieldInterface {
     }
   }
 
-  public unHiddeCell(xAxis: number, yAxis: number): string {
-    if (this.areCordinatesValid(xAxis, yAxis)) {
+  public unHideCell(xAxis: number, yAxis: number): string {
+    if (this.areCoordinatesValid(xAxis, yAxis)) {
       const cell = this.getCell(xAxis, yAxis);
 
       if (cell.isHidden() && !cell.hasBombFlag()) {
-        this.recursiveUnhiddeCell(xAxis, yAxis);
+        this.recursiveUnHideCell(xAxis, yAxis);
       }
 
       return cell.hasBombFlag() ? 'flag' : cell.getContentType();

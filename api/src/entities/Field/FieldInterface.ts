@@ -3,5 +3,5 @@ export interface FieldInterface {
   getHeight(): number;
   toString(): string;
   putAndRemoveBombFlag(xAxis: number, yAxis: number): void;
-  unHiddeCell(xAxis: number, yAxis: number): string;
+  unHideCell(xAxis: number, yAxis: number): string;
 }
