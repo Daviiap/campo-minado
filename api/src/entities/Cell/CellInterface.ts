@@ -1,4 +1,4 @@
-import { CellContentInterface } from '../CellContent/CellContentInterface';
+import { CellContentInterface } from "../CellContent/CellContentInterface";
 
 export interface CellInterface {
   getContent(): CellContentInterface | null;

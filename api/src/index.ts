@@ -1,12 +1,26 @@
+import { createServer } from "http";
+import { Server, Socket } from "socket.io";
+import { Game } from "./entities/Game/Game";
 import { Field } from "./entities/Field/Field";
 
-const height = 16;
-const width = 16;
-const numberOfBombs = 40;
-const field = new Field(width, height, numberOfBombs);
+const httpServer = createServer();
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*",
+  },
+});
 
-field.unHideCell(0,0);
-field.unHideCell(10, 7);
-field.unHideCell(8, 7);
+io.on("connection", (socket: Socket) => {
+  console.log(`Socket ${socket.id} connected!`);
 
-console.log(field.toString());
+  const field = new Field(16, 16, 40);
+  const game = new Game(field);
+
+  socket.emit("gameInitiated", game.getField());
+
+  socket.on("disconnect", () => {
+    console.log("saiu");
+  });
+});
+
+httpServer.listen(3000);
