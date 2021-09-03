@@ -159,12 +159,12 @@ export class Field implements FieldInterface {
       fieldState.push([]);
       for (let j = 0; j < this.cells[i].length; j++) {
         const cell = this.cells[i][j];
-        if (cell.isHidden()) {
+        if (cell.hasBombFlag()) {
+          fieldState[i][j] = "F";
+        } else if (cell.isHidden()) {
           fieldState[i][j] = "*";
         } else {
-          if (cell.hasBombFlag()) {
-            fieldState[i][j] = "F";
-          } else if (cell.getContentType() === "bomb") {
+          if (cell.getContentType() === "bomb") {
             fieldState[i][j] = "B";
           } else if (cell.getContentType() === "bombProximityIndicator") {
             fieldState[i][j] = `${(
