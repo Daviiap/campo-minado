@@ -3,6 +3,8 @@ import { io } from "socket.io-client";
 
 import { Container, Cell, Line, Field } from './styles';
 
+import explosao from './assets/explosao.png';
+import flag from './assets/flag.png';
 
 function App() {
   const [socket, setSocket] = useState(null);
@@ -32,6 +34,17 @@ function App() {
     event.preventDefault();
   }
 
+  const colors = {
+    1: '#dfeda6',
+    2: '#eaed91',
+    3: '#edd787',
+    4: '#ebcc86',
+    5: '#f2bc7e',
+    6: '#eba06e',
+    7: '#f29b7e',
+    8: '#f28d7c',
+  }
+
   return (
     <div className="App">
       <Container>
@@ -40,13 +53,28 @@ function App() {
             return (
               <Line key={i}>
                 {line.map((cell, j) => {
-                  return (<Cell key={j} onContextMenu={event => {
+                  let cellContent;
+
+                  if (cell === "B") {
+                    cellContent = <img src={explosao} alt="B" width="40px" />
+                  } else if (cell === "F") {
+                    cellContent = <img src={flag} alt="B" width="30px" />
+                  } else if (cell !== " " && cell !== "*") {
+                    cellContent = <h3>{cell}</h3>
+                  } else {
+                    cellContent = ""
+                  }
+
+                  const cellBackground = cell === "*" || cell === "F" ? "#cdcdcd" : cell === " " ? "#efefef" : cell === "B" ? "#f55656" : colors[cell];
+
+                  return (<Cell backgroundColor={cellBackground} key={j} onContextMenu={_ => {
                     socket.emit("putRemoveFlag", { x: j, y: i })
                     console.log(i, j);
-                  }} onClick={event => {
+                  }} onClick={_ => {
+                    socket.emit("unHideCellNeighbors", { x: j, y: i });
                     socket.emit("unHideCell", { x: j, y: i })
                     console.log(i, j);
-                  }} >{cell}</Cell>)
+                  }} >{cellContent}</Cell>)
                 })}
               </Line>
             )
