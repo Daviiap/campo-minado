@@ -10,6 +10,17 @@ export class Game implements GameInterface {
     this.gameOver = false;
   }
 
+  public unHideCellNeighbors(xAxis: number, yAxis: number): string {
+    const result = this.field.unHideCellNeighbors(xAxis, yAxis);
+
+    if (result === "KABOOM") {
+      this.gameOver = true;
+      this.field.unHideAll();
+    }
+
+    return result;
+  }
+
   public unHideBlock(xAxis: number, yAxis: number): string {
     let unHidedBlock = "";
     if (!this.gameOver) {

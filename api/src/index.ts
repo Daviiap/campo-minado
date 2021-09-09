@@ -4,6 +4,7 @@ import { Game } from "./entities/Game/Game";
 import { Field } from "./entities/Field/Field";
 
 const httpServer = createServer();
+
 const io = new Server(httpServer, {
   cors: {
     origin: "*",
@@ -22,6 +23,13 @@ io.on("connection", (socket: Socket) => {
   socket.on("unHideCell", (data) => {
     console.log(`Coordinates (${data.x}, ${data.y}) clicked! (UNHIDE)`);
     game.unHideBlock(data.x, data.y);
+    console.log(field.toString());
+    socket.emit("updateField", game.getField());
+  });
+
+  socket.on("unHideCellNeighbors", (data) => {
+    console.log(`Coordinates (${data.x}, ${data.y}) clicked! (UNHIDE)`);
+    game.unHideCellNeighbors(data.x, data.y);
     console.log(field.toString());
     socket.emit("updateField", game.getField());
   });

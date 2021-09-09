@@ -4,4 +4,5 @@ export interface GameInterface {
   unHideBlock(xAxis: number, yAxis: number): string;
   putAndRemoveFlag(xAxis: number, yAxis: number): void;
   getField(): string[][];
+  unHideCellNeighbors(xAxis: number, yAxis: number): string;
 }

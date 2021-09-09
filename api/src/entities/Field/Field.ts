@@ -153,6 +153,73 @@ export class Field implements FieldInterface {
     }
   }
 
+  public unHideCellNeighbors(xAxis: number, yAxis: number): string {
+    if (this.areCoordinatesValid(xAxis, yAxis)) {
+      let action = "NOTHING";
+      const cell = this.getCell(xAxis, yAxis);
+
+      if (
+        !cell.isHidden() &&
+        cell.getContentType() === "bombProximityIndicator"
+      ) {
+        const cellNumber = (
+          cell.getContent() as BombProximityIndicator
+        ).getBombCounter();
+
+        let bombsAround = 0;
+
+        for (let y = yAxis - 1; y <= yAxis + 1; y++) {
+          for (let x = xAxis - 1; x <= xAxis + 1; x++) {
+            if (
+              this.areCoordinatesValid(x, y) &&
+              (x !== xAxis || y !== yAxis)
+            ) {
+              const neighborCell = this.cells[y][x];
+              if (neighborCell.hasBombFlag()) {
+                bombsAround++;
+              }
+            }
+          }
+        }
+
+        if (bombsAround === cellNumber) {
+          for (let y = yAxis - 1; y <= yAxis + 1; y++) {
+            for (let x = xAxis - 1; x <= xAxis + 1; x++) {
+              if (
+                this.areCoordinatesValid(x, y) &&
+                (x !== xAxis || y !== yAxis)
+              ) {
+                const neighborCell = this.cells[y][x];
+                if (
+                  neighborCell.getContentType() === "bomb" &&
+                  !neighborCell.hasBombFlag()
+                ) {
+                  action = "KABOOM";
+                }
+
+                if (
+                  neighborCell.isHidden() &&
+                  neighborCell.getContentType() === "void"
+                ) {
+                  this.recursiveUnHideCell(x, y);
+                } else if (
+                  neighborCell.isHidden() &&
+                  !neighborCell.hasBombFlag()
+                ) {
+                  neighborCell.unHide();
+                }
+              }
+            }
+          }
+        }
+      }
+
+      return action;
+    } else {
+      throw new Error();
+    }
+  }
+
   public getWidth(): number {
     return this.width;
   }
