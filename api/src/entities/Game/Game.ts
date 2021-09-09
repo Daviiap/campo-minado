@@ -17,6 +17,7 @@ export class Game implements GameInterface {
 
       if (unHidedBlock === "bomb") {
         this.gameOver = true;
+        this.field.unHideAll();
       }
     }
     return unHidedBlock;

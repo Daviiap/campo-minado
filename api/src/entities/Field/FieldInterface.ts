@@ -7,4 +7,5 @@ export interface FieldInterface {
   putAndRemoveBombFlag(xAxis: number, yAxis: number): void;
   unHideCell(xAxis: number, yAxis: number): string;
   getState(): string[][];
+  unHideAll(): void;
 }

@@ -111,6 +111,11 @@ export class Field implements FieldInterface {
   private recursiveUnHideCell(xAxis: number, yAxis: number): void {
     const cell = this.getCell(xAxis, yAxis);
     cell.unHide();
+
+    if (cell.hasBombFlag()) {
+      cell.changeBombFlag();
+    }
+
     if (cell.getContentType() === "void") {
       for (let y = yAxis - 1; y <= yAxis + 1; y++) {
         for (let x = xAxis - 1; x <= xAxis + 1; x++) {
@@ -182,6 +187,16 @@ export class Field implements FieldInterface {
 
   public getHeight(): number {
     return this.height;
+  }
+
+  public unHideAll(): void {
+    for (let line of this.cells) {
+      for (let cell of line) {
+        if (cell.isHidden()) {
+          cell.unHide();
+        }
+      }
+    }
   }
 
   public toString(): string {
