@@ -10,6 +10,7 @@ export const Container = styled.div`
 `;
 
 export const Field = styled.div`
+  border-radius: 5px;
   border: 1px solid black;
   display: flex;
   gap: 2px;
@@ -28,7 +29,7 @@ export const Line = styled.div`
 `;
 
 export const Cell = styled.div`
-border-radius: 3px;
+  border-radius: 3px;
   border: 1px solid black;
   height: 5vh;
   width: 5vh;
