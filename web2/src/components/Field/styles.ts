@@ -30,5 +30,33 @@ export const Cell = styled.div<CellProps>`
   display: grid;
   place-items: center;
   padding: 0px;
-  background-color: ${(props) => props.backgroundColor || "#FFF"};
+  background-color: ${(props) => props.backgroundColor || "#ffffff"};
+  :hover {
+    cursor: ${(props) => {
+      let cursor: string;
+      if (props.backgroundColor === "#cdcdcd") {
+        cursor = "pointer";
+      } else {
+        cursor = "default";
+      }
+      return cursor;
+    }};
+
+    background-color: ${(props) => {
+      let color = props.backgroundColor;
+      if (props.backgroundColor === "#cdcdcd") {
+        color = "#cacaca";
+      }
+      return color;
+    }};
+  }
+`;
+
+export const NumberSpan = styled.span`
+  width: 90%;
+  height: 90%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 200%;
 `;

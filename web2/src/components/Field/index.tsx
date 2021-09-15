@@ -1,65 +1,80 @@
-import React from "react";
+import React, { ReactElement, useEffect } from "react";
 import { FieldProps } from "./PropsInterface";
 
-import { Cell, FieldContainer, Line } from "./styles";
+import { Colors } from "./ColorsEnum";
 
-import explosao from "../../assets/explosao.png";
+import { Cell, FieldContainer, Line, NumberSpan } from "./styles";
+
 import flag from "../../assets/flag.png";
+import bomb from "../../assets/bomb.png";
+import flagP from "../../assets/flagP.png";
 
-export const Field: React.FC<FieldProps> = (props) => {
-  const colors = {
-    "1": "#dfeda6",
-    "2": "#eaed91",
-    "3": "#edd787",
-    "4": "#ebcc86",
-    "5": "#f2bc7e",
-    "6": "#eba06e",
-    "7": "#f29b7e",
-    "8": "#f28d7c",
-  };
+const getCellContent = (cell: string): ReactElement => {
+  let cellContent;
+  if (cell === "B") {
+    cellContent = <img src={bomb} alt="B" width="90%" />;
+  } else if (cell === "F") {
+    cellContent = <img src={flag} alt="F" width="50%" />;
+  } else if (cell === "PF") {
+    cellContent = <img src={flagP} alt="B" width="60%" />;
+  } else if (cell !== " " && cell !== "*") {
+    cellContent = <NumberSpan>{cell}</NumberSpan>;
+  } else {
+    cellContent = <></>;
+  }
 
+  return cellContent;
+};
+
+const getCellBackground = (cell: string): string => {
+  let cellBackground: string;
+  if (cell === "*" || cell === "F" || cell === "PF") {
+    cellBackground = "#cdcdcd";
+  } else if (cell === " ") {
+    cellBackground = "#efefef";
+  } else if (cell === "B") {
+    cellBackground = "#f55656";
+  } else {
+    cellBackground =
+      Colors[`color-${cell as "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8"}`];
+  }
+  return cellBackground;
+};
+
+export const Field: React.FC<FieldProps> = ({ data, socketConnection }) => {
+  useEffect(() => {}, [data]);
   return (
-    <FieldContainer>
-      {props.data
-        ? props.data.map((line, i) => {
-            return (
-              <Line key={i}>
-                {line.map((cell, j) => {
-                  let cellContent;
-
-                  if (cell === "B") {
-                    cellContent = <img src={explosao} alt="B" width="40px" />;
-                  } else if (cell === "F") {
-                    cellContent = <img src={flag} alt="F" width="30px" />;
-                  } else if (cell === "PF") {
-                    cellContent = <h3>?</h3>;
-                  } else if (cell !== " " && cell !== "*") {
-                    cellContent = <h3>{cell}</h3>;
-                  } else {
-                    cellContent = "";
-                  }
-
-                  const cellBackground: string =
-                    cell === "*" || cell === "F" || cell === "PF"
-                      ? "#cdcdcd"
-                      : cell === " "
-                      ? "#efefef"
-                      : cell === "B"
-                      ? "#f55656"
-                      : colors[
-                          cell as "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8"
-                        ];
-
-                  return (
-                    <Cell backgroundColor={cellBackground} key={j}>
-                      {cellContent}
-                    </Cell>
-                  );
-                })}
-              </Line>
-            );
-          })
-        : null}
+    <FieldContainer onContextMenu={(e) => e.preventDefault()}>
+      {data.map((line, i) => {
+        return (
+          <Line key={i}>
+            {line.map((cell, j) => {
+              const cellContent = getCellContent(cell);
+              const cellBackground = getCellBackground(cell);
+              return (
+                <Cell
+                  onContextMenu={(e) => {
+                    socketConnection.emit("changeBombFlagState", {
+                      xAxis: j,
+                      yAxis: i,
+                    });
+                  }}
+                  backgroundColor={cellBackground}
+                  onClick={(e) => {
+                    socketConnection.emit("unhideCell", {
+                      xAxis: j,
+                      yAxis: i,
+                    });
+                  }}
+                  key={j}
+                >
+                  {cellContent}
+                </Cell>
+              );
+            })}
+          </Line>
+        );
+      })}
     </FieldContainer>
   );
 };
