@@ -226,25 +226,27 @@ export class Field implements FieldInterface {
     if (this.state !== "exploded") {
       if (this.areCoordinatesValid(xAxis, yAxis)) {
         const cell = this.getCell(xAxis, yAxis);
-        cell.changeBombFlagState();
-        const forwardState = cell.getBombFlagState();
+        if (cell.isHidden()) {
+          cell.changeBombFlagState();
+          const forwardState = cell.getBombFlagState();
 
-        if (forwardState === 1) {
-          this.numberOfFlags++;
-          if (cell.getContentType() === "bomb") {
-            this.numberOfFlaggedBombs++;
-            if (this.numberOfFlaggedBombs === this.numberOfBombs) {
-              this.state = "safe";
+          if (forwardState === 1) {
+            this.numberOfFlags++;
+            if (cell.getContentType() === "bomb") {
+              this.numberOfFlaggedBombs++;
+              if (this.numberOfFlaggedBombs === this.numberOfBombs) {
+                this.state = "safe";
+              }
             }
-          }
-        } else {
-          if (forwardState === 2) {
-            this.numberOfFlags--;
-          }
-          if (cell.getContentType() === "bomb") {
-            this.numberOfFlaggedBombs--;
-            if (this.isSafe()) {
-              this.state = "risk";
+          } else {
+            if (forwardState === 2) {
+              this.numberOfFlags--;
+            }
+            if (cell.getContentType() === "bomb") {
+              this.numberOfFlaggedBombs--;
+              if (this.isSafe()) {
+                this.state = "risk";
+              }
             }
           }
         }

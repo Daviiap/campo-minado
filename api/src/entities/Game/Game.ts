@@ -65,7 +65,11 @@ export class Game implements GameInterface {
   }
 
   public getFieldState(): string[][] {
-    return this.field.getField();
+    let fieldState: string[][] = [];
+    if (this.field) {
+      fieldState = this.field.getField();
+    }
+    return fieldState;
   }
 
   public getNumberOfUnflaggedBombs(): number {

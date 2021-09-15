@@ -1,7 +1,6 @@
 import { InitiateGameUseCase } from "./InitiateGameUseCase";
 
 import { Game } from "../../entities/Game/Game";
-import { Socket } from "socket.io";
 
 export class InitiateGameController {
   private initiateGameUseCase: InitiateGameUseCase;
@@ -10,7 +9,7 @@ export class InitiateGameController {
     this.initiateGameUseCase = initiateGameUseCase;
   }
 
-  public handle(socket: Socket): Game {
-    return this.initiateGameUseCase.exec({ playerId: socket.id });
+  public handle(socketId: string): Game {
+    return this.initiateGameUseCase.exec({ playerId: socketId });
   }
 }

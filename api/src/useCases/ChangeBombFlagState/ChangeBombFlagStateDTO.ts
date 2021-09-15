@@ -1,7 +1,7 @@
-import { Socket } from "socket.io";
+import { Game } from "../../entities/Game/Game";
 
 export interface ChangeBombFlagStateDTO {
   xAxis: number;
   yAxis: number;
-  socket: Socket;
+  game: Game;
 }

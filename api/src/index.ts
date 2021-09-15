@@ -8,7 +8,17 @@ import {
   InitiateGameUseCase,
 } from "./useCases/InitiateGame";
 
+import {
+  ChangeBombFlagStateController,
+  ChangeBombFlagStateUseCase,
+} from "./useCases/ChangeBombFlagState";
+
 import { UnhideCellController, UnhideCellUseCase } from "./useCases/UnHideCell";
+
+const changeBombFlagStateUseCase = new ChangeBombFlagStateUseCase();
+const changeBombFlagStateController = new ChangeBombFlagStateController(
+  changeBombFlagStateUseCase
+);
 
 const unhideCellUseCase = new UnhideCellUseCase();
 const unhideCellController = new UnhideCellController(unhideCellUseCase);
@@ -27,19 +37,29 @@ const io = new Server(httpServer, {
 io.on("connection", (socket: Socket) => {
   console.log(`Player ${socket.id} connected!`);
 
-  const game = initiateGameController.handle(socket);
+  const game = initiateGameController.handle(socket.id);
+
+  socket.emit("initiateGameState", game.getFieldState());
 
   socket.on("unhideCell", (coordinates: CoordinatesInterface) => {
+    console.log('unhideCell');
     const state = unhideCellController.handle(
       coordinates.xAxis,
       coordinates.yAxis,
       game
     );
-
     socket.emit("updateGameState", state);
   });
 
-  socket.on("changeBombFlagState", (coordinates: CoordinatesInterface) => {});
+  socket.on("changeBombFlagState", (coordinates: CoordinatesInterface) => {
+    console.log('changeBombFlagState');
+    const state = changeBombFlagStateController.handle(
+      coordinates.xAxis,
+      coordinates.yAxis,
+      game
+    );
+    socket.emit("updateGameState", state);
+  });
 
   socket.on("disconnect", () => {
     console.log(`Player ${socket.id} disconnected!`);
