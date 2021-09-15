@@ -1,0 +1,1 @@
+export { GameNotInitializedError } from "./GameNotInitializedError";

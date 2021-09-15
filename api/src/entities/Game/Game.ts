@@ -1,50 +1,100 @@
 import { Field } from "../Field/Field";
+import { GameNotInitializedError } from "./Errors";
 import { GameInterface } from "./GameInterface";
 
+import { v4 } from "uuid";
+import { Player } from "../Player/Player";
+
 export class Game implements GameInterface {
-  private field: Field;
+  private id: string;
+  private player: Player;
+  private field: Field | null;
+  private initTime: number | null;
+  private state: "created" | "initiated" | "exploded" | "safe";
   private gameOver: boolean;
 
-  public constructor(field: Field) {
-    this.field = field;
+  public constructor(player: Player) {
+    this.id = v4();
+    this.player = player;
+    this.field = null;
+    this.initTime = null;
+    this.state = "created";
     this.gameOver = false;
   }
 
-  public unHideCellNeighbors(xAxis: number, yAxis: number): string {
-    const result = this.field.unHideCellNeighbors(xAxis, yAxis);
-
-    if (result === "KABOOM") {
-      this.gameOver = true;
-      this.field.unHideAll();
-    }
-
-    return result;
+  public initiate(initialFieldState: Field): void {
+    this.field = initialFieldState;
+    this.initTime = new Date().getTime();
+    this.state = "initiated";
   }
 
-  public unHideBlock(xAxis: number, yAxis: number): string {
-    let unHidedBlock = "";
-    if (!this.gameOver) {
-      unHidedBlock = this.field.unHideCell(xAxis, yAxis);
-
-      if (unHidedBlock === "bomb") {
-        this.gameOver = true;
-        this.field.unHideAll();
-      }
-    }
-    return unHidedBlock;
+  public getId(): string {
+    return this.id;
   }
 
-  public putAndRemoveFlag(xAxis: number, yAxis: number): void {
-    if (!this.gameOver) {
-      this.field.putAndRemoveBombFlag(xAxis, yAxis);
+  public changeBombFlagState(xAxis: number, yAxis: number): void {
+    if (this.field) {
+      this.field.changeFlagState(xAxis, yAxis);
+    } else {
+      throw new GameNotInitializedError();
     }
   }
 
-  public getField(): string[][] {
-    return this.field.getState();
-  }
-
-  public hasGameOver(): boolean {
+  public isGameOver(): boolean {
     return this.gameOver;
+  }
+
+  public getTime(): number {
+    let time: number = 0;
+    if (this.initTime) {
+      time = new Date().getTime() - this.initTime;
+    }
+    return time;
+  }
+
+  public getNumberOfBombs(): number {
+    if (this.field) {
+      return this.field.getNumberOfBombs();
+    } else {
+      throw new GameNotInitializedError();
+    }
+  }
+
+  public getGameState(): string {
+    return this.state;
+  }
+
+  public getFieldState(): string[][] {
+    return this.field.getField();
+  }
+
+  public getNumberOfUnflaggedBombs(): number {
+    if (this.field) {
+      return this.field.getNumberOfBombs() - this.field.getNumberOfFlags();
+    } else {
+      throw new GameNotInitializedError();
+    }
+  }
+
+  public getPlayerId(): string {
+    return this.player.getId();
+  }
+
+  public clickCell(xAxis: number, yAxis: number): string {
+    if (this.field) {
+      this.field.unhideCell(xAxis, yAxis);
+
+      if (
+        this.field.getState() === "exploded" ||
+        this.field.getState() === "safe"
+      ) {
+        this.gameOver = true;
+        this.state = this.field.getState() as "exploded" | "safe";
+      }
+
+      return this.state;
+    } else {
+      throw new GameNotInitializedError();
+    }
   }
 }

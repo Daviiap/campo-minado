@@ -16,6 +16,6 @@ export class BombProximityIndicator implements BombProximityIndicatorInterface {
   }
 
   public getType(): string {
-    return 'bombProximityIndicator';
+    return "bombProximityIndicator";
   }
 }

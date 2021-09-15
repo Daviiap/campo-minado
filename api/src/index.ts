@@ -1,7 +1,20 @@
 import { createServer } from "http";
 import { Server, Socket } from "socket.io";
-import { Game } from "./entities/Game/Game";
-import { Field } from "./entities/Field/Field";
+
+import { CoordinatesInterface } from "./entities/Coordinates/CoordinatesInterface";
+
+import {
+  InitiateGameController,
+  InitiateGameUseCase,
+} from "./useCases/InitiateGame";
+
+import { UnhideCellController, UnhideCellUseCase } from "./useCases/UnHideCell";
+
+const unhideCellUseCase = new UnhideCellUseCase();
+const unhideCellController = new UnhideCellController(unhideCellUseCase);
+
+const initiateGameUseCase = new InitiateGameUseCase();
+const initiateGameController = new InitiateGameController(initiateGameUseCase);
 
 const httpServer = createServer();
 
@@ -12,37 +25,24 @@ const io = new Server(httpServer, {
 });
 
 io.on("connection", (socket: Socket) => {
-  console.log(`Socket ${socket.id} connected!`);
-  console.clear();
+  console.log(`Player ${socket.id} connected!`);
 
-  const field = new Field(16, 16, 40);
-  const game = new Game(field);
+  const game = initiateGameController.handle(socket);
 
-  socket.emit("gameInitiated", game.getField());
+  socket.on("unhideCell", (coordinates: CoordinatesInterface) => {
+    const state = unhideCellController.handle(
+      coordinates.xAxis,
+      coordinates.yAxis,
+      game
+    );
 
-  socket.on("unHideCell", (data) => {
-    console.log(`Coordinates (${data.x}, ${data.y}) clicked! (UNHIDE)`);
-    game.unHideBlock(data.x, data.y);
-    console.log(field.toString());
-    socket.emit("updateField", game.getField());
+    socket.emit("updateGameState", state);
   });
 
-  socket.on("unHideCellNeighbors", (data) => {
-    console.log(`Coordinates (${data.x}, ${data.y}) clicked! (UNHIDE)`);
-    game.unHideCellNeighbors(data.x, data.y);
-    console.log(field.toString());
-    socket.emit("updateField", game.getField());
-  });
-
-  socket.on("putRemoveFlag", (data) => {
-    console.log(`Coordinates (${data.x}, ${data.y}) clicked! (FLAG)`);
-    game.putAndRemoveFlag(data.x, data.y);
-    console.log(field.toString());
-    socket.emit("updateField", game.getField());
-  });
+  socket.on("changeBombFlagState", (coordinates: CoordinatesInterface) => {});
 
   socket.on("disconnect", () => {
-    console.log("saiu");
+    console.log(`Player ${socket.id} disconnected!`);
   });
 });
 

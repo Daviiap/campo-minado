@@ -1,3 +1,3 @@
 export interface CellContentInterface {
-    getType(): string;
+  getType(): string;
 }

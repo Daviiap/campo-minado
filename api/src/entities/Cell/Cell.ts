@@ -3,16 +3,20 @@ import { CellInterface } from "./CellInterface";
 
 export class Cell implements CellInterface {
   private content: CellContentInterface | null;
-  private bombFlag: boolean;
+  private bombFlag: number;
   private hidden: boolean;
 
   public constructor(content: CellContentInterface | null = null) {
     this.content = content;
-    this.bombFlag = false;
+    this.bombFlag = 0;
     this.hidden = true;
   }
 
   public hasBombFlag(): boolean {
+    return this.bombFlag === 1;
+  }
+
+  public getBombFlagState(): number {
     return this.bombFlag;
   }
 
@@ -22,12 +26,23 @@ export class Cell implements CellInterface {
     }
   }
 
-  public changeBombFlag(): void {
-    this.bombFlag = !this.bombFlag;
+  public changeBombFlagState(state: 0 | 1 | 2 | undefined = undefined): void {
+    if (state !== undefined) {
+      this.bombFlag = state;
+    } else {
+      if (this.bombFlag < 2) {
+        this.bombFlag++;
+      } else {
+        this.bombFlag = 0;
+      }
+    }
   }
 
   public unHide(): void {
-    this.hidden = false;
+    if (this.bombFlag !== 1) {
+      this.bombFlag = 0;
+      this.hidden = false;
+    }
   }
 
   public isHidden(): boolean {
@@ -38,7 +53,10 @@ export class Cell implements CellInterface {
     return this.content;
   }
 
-  public getContentType(): string {
-    return this.content ? this.content.getType() : "void";
+  public getContentType(): "bombProximityIndicator" | "bomb" | "void" {
+    return (this.content ? this.content.getType() : "void") as
+      | "bombProximityIndicator"
+      | "bomb"
+      | "void";
   }
 }

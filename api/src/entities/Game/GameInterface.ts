@@ -1,8 +1,15 @@
 import { Field } from "../Field/Field";
 
 export interface GameInterface {
-  unHideBlock(xAxis: number, yAxis: number): string;
-  putAndRemoveFlag(xAxis: number, yAxis: number): void;
-  getField(): string[][];
-  unHideCellNeighbors(xAxis: number, yAxis: number): string;
+  initiate(initialFieldState: Field): void;
+  changeBombFlagState(xAxis: number, yAxis: number): void;
+  isGameOver(): boolean;
+  getId(): string;
+  getTime(): number;
+  getNumberOfBombs(): number;
+  getNumberOfUnflaggedBombs(): number;
+  getPlayerId(): string;
+  getGameState(): string;
+  getFieldState(): string[][];
+  clickCell(xAxis: number, yAxis: number): string;
 }

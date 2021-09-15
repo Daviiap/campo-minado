@@ -3,9 +3,10 @@ import { CellContentInterface } from "../CellContent/CellContentInterface";
 export interface CellInterface {
   getContent(): CellContentInterface | null;
   insertContent(content: CellContentInterface): void;
-  getContentType(): string;
+  getContentType(): "bombProximityIndicator" | "bomb" | "void";
   hasBombFlag(): boolean;
-  changeBombFlag(): void;
+  getBombFlagState(): number;
+  changeBombFlagState(state: 0 | 1 | 2 | undefined): void;
   isHidden(): boolean;
   unHide(): void;
 }
