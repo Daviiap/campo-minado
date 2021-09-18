@@ -141,13 +141,15 @@ export class Field implements FieldInterface {
 
   private recursiveUnhideCell(xAxis: number, yAxis: number): void {
     const cell = this.getCell(xAxis, yAxis);
+
+    
     cell.unHide();
     this.numberOfHiddenCells--;
-
+    
     if (cell.getBombFlagState() !== 0) {
       cell.changeBombFlagState(0);
     }
-
+    
     if (cell.getContentType() === "void") {
       for (let y = yAxis - 1; y <= yAxis + 1; y++) {
         for (let x = xAxis - 1; x <= xAxis + 1; x++) {
@@ -199,7 +201,7 @@ export class Field implements FieldInterface {
                 neighborCell.getContentType() === "bomb" &&
                 !neighborCell.hasBombFlag()
               ) {
-                action = "explode";
+                this.state = "exploded";
               }
 
               if (
@@ -391,6 +393,7 @@ export class Field implements FieldInterface {
     for (let line of this.cells) {
       for (let cell of line) {
         if (cell.isHidden() && cell.getContentType() === "bomb") {
+          cell.changeBombFlagState(0);
           cell.unHide();
         }
       }
