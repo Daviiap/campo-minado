@@ -126,7 +126,10 @@ export class Field implements FieldInterface {
           this.unHideCellNeighbors(xAxis, yAxis);
         }
 
-        if (this.numberOfBombs === this.numberOfHiddenCells) {
+        if (
+          this.numberOfBombs === this.numberOfHiddenCells ||
+          this.numberOfFlaggedBombs === this.numberOfBombs
+        ) {
           this.state = "safe";
         }
 
@@ -235,7 +238,10 @@ export class Field implements FieldInterface {
             this.numberOfFlags++;
             if (cell.getContentType() === "bomb") {
               this.numberOfFlaggedBombs++;
-              if (this.numberOfFlaggedBombs === this.numberOfBombs) {
+              if (
+                this.numberOfBombs === this.numberOfHiddenCells ||
+                this.numberOfFlaggedBombs === this.numberOfBombs
+              ) {
                 this.state = "safe";
               }
             }

@@ -42,17 +42,22 @@ io.on("connection", (socket: Socket) => {
   socket.emit("initiateGameState", game.getFieldState());
 
   socket.on("unhideCell", (coordinates: CoordinatesInterface) => {
-    console.log('unhideCell');
     const state = unhideCellController.handle(
       coordinates.xAxis,
       coordinates.yAxis,
       game
     );
+
     socket.emit("updateGameState", state);
+
+    if (game.getGameState() === "exploded") {
+      socket.emit("exploded");
+    } else if (game.getGameState() === "safe") {
+      socket.emit("safe");
+    }
   });
 
   socket.on("changeBombFlagState", (coordinates: CoordinatesInterface) => {
-    console.log('changeBombFlagState');
     const state = changeBombFlagStateController.handle(
       coordinates.xAxis,
       coordinates.yAxis,

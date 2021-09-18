@@ -34,7 +34,9 @@ export class Game implements GameInterface {
 
   public changeBombFlagState(xAxis: number, yAxis: number): void {
     if (this.field) {
-      this.field.changeFlagState(xAxis, yAxis);
+      if (!this.gameOver) {
+        this.field.changeFlagState(xAxis, yAxis);
+      }
     } else {
       throw new GameNotInitializedError();
     }
@@ -86,17 +88,19 @@ export class Game implements GameInterface {
 
   public clickCell(xAxis: number, yAxis: number): string {
     if (this.field) {
-      this.field.unhideCell(xAxis, yAxis);
+      if (!this.gameOver) {
+        this.field.unhideCell(xAxis, yAxis);
 
-      if (
-        this.field.getState() === "exploded" ||
-        this.field.getState() === "safe"
-      ) {
-        this.gameOver = true;
-        this.state = this.field.getState() as "exploded" | "safe";
+        if (
+          this.field.getState() === "exploded" ||
+          this.field.getState() === "safe"
+        ) {
+          this.gameOver = true;
+          this.state = this.field.getState() as "exploded" | "safe";
+        }
+
+        return this.state;
       }
-
-      return this.state;
     } else {
       throw new GameNotInitializedError();
     }
