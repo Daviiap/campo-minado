@@ -142,14 +142,13 @@ export class Field implements FieldInterface {
   private recursiveUnhideCell(xAxis: number, yAxis: number): void {
     const cell = this.getCell(xAxis, yAxis);
 
-    
-    cell.unHide();
-    this.numberOfHiddenCells--;
-    
     if (cell.getBombFlagState() !== 0) {
       cell.changeBombFlagState(0);
     }
-    
+
+    cell.unHide();
+    this.numberOfHiddenCells--;
+
     if (cell.getContentType() === "void") {
       for (let y = yAxis - 1; y <= yAxis + 1; y++) {
         for (let x = xAxis - 1; x <= xAxis + 1; x++) {
