@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { Field } from "../../components/Field";
 
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 
 import { Container } from "./styles";
 
 export const Game: React.FC = () => {
-  const [socket] = useState(io("http://localhost:3000/"));
+  const [socket, setSocket] = useState({} as Socket);
   const [field, setField] = useState([] as string[][]);
 
   useEffect(() => {
-    if (socket) {
+    setSocket(io("http://localhost:3000/"));
+  }, []);
+
+  useEffect(() => {
+    if (Object.keys(socket).length) {
       socket.on("connect", () => {
         console.log(`Your id: ${socket.id}`);
         socket.on("initiateGameState", (gameState) => {
