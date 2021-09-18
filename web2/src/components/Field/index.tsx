@@ -5,16 +5,17 @@ import { Colors } from "./ColorsEnum";
 
 import { Cell, FieldContainer, Line, NumberSpan } from "./styles";
 
-import flag from "../../assets/flag.png";
-import bomb from "../../assets/bomb.png";
-import flagP from "../../assets/flagP.png";
+import flag from "../../assets/flag.svg";
+import bomb from "../../assets/bomb.svg";
+import flagP from "../../assets/flagP.svg";
+import { Socket } from "socket.io-client";
 
 const getCellContent = (cell: string): ReactElement => {
   let cellContent;
   if (cell === "B") {
     cellContent = <img src={bomb} alt="B" width="90%" />;
   } else if (cell === "F") {
-    cellContent = <img src={flag} alt="F" width="50%" />;
+    cellContent = <img src={flag} alt="F" width="60%" />;
   } else if (cell === "PF") {
     cellContent = <img src={flagP} alt="B" width="60%" />;
   } else if (cell !== " " && cell !== "*") {
@@ -41,6 +42,20 @@ const getCellBackground = (cell: string): string => {
   return cellBackground;
 };
 
+const handleRightClick = (socketConnection: Socket, i: number, j: number) => {
+  socketConnection.emit("changeBombFlagState", {
+    xAxis: j,
+    yAxis: i,
+  });
+};
+
+const handleLeftClick = (socketConnection: Socket, i: number, j: number) => {
+  socketConnection.emit("unhideCell", {
+    xAxis: j,
+    yAxis: i,
+  });
+};
+
 export const Field: React.FC<FieldProps> = ({ data, socketConnection }) => {
   useEffect(() => {}, [data]);
   return (
@@ -49,26 +64,19 @@ export const Field: React.FC<FieldProps> = ({ data, socketConnection }) => {
         return (
           <Line key={i}>
             {line.map((cell, j) => {
-              const cellContent = getCellContent(cell);
               const cellBackground = getCellBackground(cell);
               return (
                 <Cell
-                  onContextMenu={(e) => {
-                    socketConnection.emit("changeBombFlagState", {
-                      xAxis: j,
-                      yAxis: i,
-                    });
+                  onContextMenu={() => {
+                    handleRightClick(socketConnection, i, j);
+                  }}
+                  onClick={() => {
+                    handleLeftClick(socketConnection, i, j);
                   }}
                   backgroundColor={cellBackground}
-                  onClick={(e) => {
-                    socketConnection.emit("unhideCell", {
-                      xAxis: j,
-                      yAxis: i,
-                    });
-                  }}
                   key={j}
                 >
-                  {cellContent}
+                  {getCellContent(cell)}
                 </Cell>
               );
             })}
