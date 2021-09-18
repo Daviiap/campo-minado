@@ -5,10 +5,9 @@ export const Container = styled.div`
   width: 100vw;
   background-color: #454545;
   padding: 24px;
+  display: grid;
+  grid-template-columns: 1fr 3fr 1fr;
+  place-items: center;
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
   border: 1px solid black;
-  align-items: center;
-  justify-content: center;
 `;

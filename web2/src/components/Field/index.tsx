@@ -3,23 +3,51 @@ import { FieldProps } from "./PropsInterface";
 
 import { Colors } from "./ColorsEnum";
 
-import { Cell, FieldContainer, Line, NumberSpan } from "./styles";
+import { Cell, FieldContainer, Line, CellContentImg } from "./styles";
 
+import number1 from "../../assets/1.svg";
+import number2 from "../../assets/2.svg";
+import number3 from "../../assets/3.svg";
+import number4 from "../../assets/4.svg";
+import number5 from "../../assets/5.svg";
+import number6 from "../../assets/6.svg";
+import number7 from "../../assets/7.svg";
+import number8 from "../../assets/8.svg";
 import flag from "../../assets/flag.svg";
 import bomb from "../../assets/bomb.svg";
 import flagP from "../../assets/flagP.svg";
 import { Socket } from "socket.io-client";
 
+const getNumber = (cell: string) => {
+  if (`number${cell}` === "number1") {
+    return number1;
+  } else if (`number${cell}` === "number2") {
+    return number2;
+  } else if (`number${cell}` === "number3") {
+    return number3;
+  } else if (`number${cell}` === "number4") {
+    return number4;
+  } else if (`number${cell}` === "number5") {
+    return number5;
+  } else if (`number${cell}` === "number6") {
+    return number6;
+  } else if (`number${cell}` === "number7") {
+    return number7;
+  } else if (`number${cell}` === "number8") {
+    return number8;
+  }
+};
+
 const getCellContent = (cell: string): ReactElement => {
   let cellContent;
   if (cell === "B") {
-    cellContent = <img src={bomb} alt="B" width="90%" />;
+    cellContent = <CellContentImg src={bomb} alt="B" />;
   } else if (cell === "F") {
-    cellContent = <img src={flag} alt="F" width="60%" />;
+    cellContent = <CellContentImg src={flag} alt="F" />;
   } else if (cell === "PF") {
-    cellContent = <img src={flagP} alt="B" width="60%" />;
+    cellContent = <CellContentImg src={flagP} alt="B" />;
   } else if (cell !== " " && cell !== "*") {
-    cellContent = <NumberSpan>{cell}</NumberSpan>;
+    cellContent = <CellContentImg src={getNumber(cell)} alt={cell} />;
   } else {
     cellContent = <></>;
   }
@@ -42,22 +70,35 @@ const getCellBackground = (cell: string): string => {
   return cellBackground;
 };
 
-const handleRightClick = (socketConnection: Socket, i: number, j: number) => {
-  socketConnection.emit("changeBombFlagState", {
-    xAxis: j,
-    yAxis: i,
-  });
+const handleRightClick = (
+  socketConnection: Socket | null,
+  i: number,
+  j: number
+) => {
+  if (socketConnection) {
+    socketConnection.emit("changeBombFlagState", {
+      xAxis: j,
+      yAxis: i,
+    });
+  }
 };
 
-const handleLeftClick = (socketConnection: Socket, i: number, j: number) => {
-  socketConnection.emit("unhideCell", {
-    xAxis: j,
-    yAxis: i,
-  });
+const handleLeftClick = (
+  socketConnection: Socket | null,
+  i: number,
+  j: number
+) => {
+  if (socketConnection) {
+    socketConnection.emit("unhideCell", {
+      xAxis: j,
+      yAxis: i,
+    });
+  }
 };
 
 export const Field: React.FC<FieldProps> = ({ data, socketConnection }) => {
   useEffect(() => {}, [data]);
+
   return (
     <FieldContainer onContextMenu={(e) => e.preventDefault()}>
       {data.map((line, i) => {
