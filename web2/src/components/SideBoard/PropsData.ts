@@ -1,3 +1,8 @@
+import { Socket } from "socket.io-client";
+
 export interface SideBoardPropsInterface {
-  start: boolean;
+  startClock: boolean;
+  socketConnection: Socket | null;
+  numberOfBombs: number;
+  numberOfFlags: number;
 }

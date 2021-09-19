@@ -59,11 +59,11 @@ export const ResetButton = styled.button`
   font-weight: bolder;
   :hover {
     cursor: pointer;
-    background-color: pink;
+    background-color: #f28d7c;
     color: #ffffff;
   }
   :focus {
-    background-color: pink;
+    background-color: #f28d7c;
     color: #ffffff;
   }
 `;

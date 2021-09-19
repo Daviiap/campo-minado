@@ -19,10 +19,11 @@ import { SideBoardPropsInterface } from "./PropsData";
 const SideBoard: React.FC<SideBoardPropsInterface> = (props) => {
   const [minutes, setMinutes] = useState(0);
   const [seconds, setSeconds] = useState(0);
+  const [numberOfBombs, setNumberOfBombs] = useState(props.numberOfBombs);
+  const [numberOfFlags, setNumberOfFlags] = useState(props.numberOfFlags);
 
   useEffect(() => {
-    console.log(props.start);
-    if (props.start) {
+    if (props.startClock) {
       const myInterval = setInterval(() => {
         if (seconds === 59) {
           setMinutes(minutes + 1);
@@ -35,7 +36,12 @@ const SideBoard: React.FC<SideBoardPropsInterface> = (props) => {
         clearInterval(myInterval);
       };
     }
-  }, [seconds, minutes, props.start]);
+  }, [seconds, minutes, props.startClock]);
+
+  useEffect(() => {
+    setNumberOfBombs(props.numberOfBombs);
+    setNumberOfFlags(props.numberOfFlags);
+  }, [props.numberOfFlags, props.numberOfBombs]);
 
   return (
     <Container>
@@ -56,10 +62,10 @@ const SideBoard: React.FC<SideBoardPropsInterface> = (props) => {
         <InfoContainer>
           <FlagCounterImage src={flagInfo} alt="clock" />
           <BombCounter>
-            {`${(0).toLocaleString("en-US", {
+            {`${numberOfFlags.toLocaleString("en-US", {
               minimumIntegerDigits: 2,
               useGrouping: false,
-            })} / ${(40).toLocaleString("en-US", {
+            })} / ${numberOfBombs.toLocaleString("en-US", {
               minimumIntegerDigits: 2,
               useGrouping: false,
             })}`}
@@ -67,7 +73,16 @@ const SideBoard: React.FC<SideBoardPropsInterface> = (props) => {
         </InfoContainer>
       </InfosContainer>
 
-      <ResetButton>RESET</ResetButton>
+      <ResetButton
+        onClick={(event) => {
+          event.preventDefault();
+          props.socketConnection?.emit("resetGame");
+          setMinutes(0);
+          setSeconds(0);
+        }}
+      >
+        RESET
+      </ResetButton>
     </Container>
   );
 };

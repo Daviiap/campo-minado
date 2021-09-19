@@ -10,6 +10,8 @@ export const Game: React.FC = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [field, setField] = useState([] as string[][]);
   const [startClock, setStartClock] = useState(false);
+  const [numberOfBombs, setNumberOfBombs] = useState(0);
+  const [numberOfFlags, setNumberOfFlags] = useState(0);
 
   useEffect(() => {
     setSocket(io("http://localhost:3000/"));
@@ -23,12 +25,21 @@ export const Game: React.FC = () => {
         console.log(`Your id: ${socket.id}`);
         socket.on("initiateGameState", (gameState) => {
           if (!field.length) {
-            setField(gameState);
+            setNumberOfBombs(gameState.numberOfBombs);
+            setNumberOfFlags(gameState.numberOfFlags);
+            setField(gameState.field);
           }
         });
         socket.on("updateGameState", (gameState) => {
+          setNumberOfFlags(gameState.numberOfFlags);
           setStartClock(true);
-          setField(gameState);
+          setField(gameState.field);
+        });
+        socket.on("resetGameState", (gameState) => {
+          setNumberOfBombs(gameState.numberOfBombs);
+          setNumberOfFlags(gameState.numberOfFlags);
+          setStartClock(false);
+          setField(gameState.field);
         });
         socket.on("exploded", () => {
           setStartClock(false);
@@ -46,7 +57,12 @@ export const Game: React.FC = () => {
     <Container>
       <div></div>
       <Field socketConnection={socket} data={field} />
-      <SideBoard start={startClock} />
+      <SideBoard
+        numberOfBombs={numberOfBombs}
+        numberOfFlags={numberOfFlags}
+        socketConnection={socket}
+        startClock={startClock}
+      />
     </Container>
   );
 };
