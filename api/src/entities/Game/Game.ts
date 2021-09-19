@@ -36,6 +36,14 @@ export class Game implements GameInterface {
     if (this.field) {
       if (!this.gameOver) {
         this.field.changeFlagState(xAxis, yAxis);
+
+        if (
+          this.field.getState() === "exploded" ||
+          this.field.getState() === "safe"
+        ) {
+          this.gameOver = true;
+          this.state = this.field.getState() as "exploded" | "safe";
+        }
       }
     } else {
       throw new GameNotInitializedError();
@@ -74,9 +82,9 @@ export class Game implements GameInterface {
     return fieldState;
   }
 
-  public getNumberOfUnflaggedBombs(): number {
+  public getNumberOfFlags(): number {
     if (this.field) {
-      return this.field.getNumberOfBombs() - this.field.getNumberOfFlags();
+      return this.field.getNumberOfFlags();
     } else {
       throw new GameNotInitializedError();
     }
@@ -98,7 +106,6 @@ export class Game implements GameInterface {
           this.gameOver = true;
           this.state = this.field.getState() as "exploded" | "safe";
         }
-
         return this.state;
       }
     } else {

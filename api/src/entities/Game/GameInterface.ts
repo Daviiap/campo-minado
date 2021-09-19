@@ -7,7 +7,7 @@ export interface GameInterface {
   getId(): string;
   getTime(): number;
   getNumberOfBombs(): number;
-  getNumberOfUnflaggedBombs(): number;
+  getNumberOfFlags(): number;
   getPlayerId(): string;
   getGameState(): string;
   getFieldState(): string[][];

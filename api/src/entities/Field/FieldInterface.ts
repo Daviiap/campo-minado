@@ -9,6 +9,7 @@ export interface FieldInterface {
   getHeight(): number;
   getNumberOfBombs(): number;
   getNumberOfFlags(): number;
+  getNumberOfHiddenCells(): number;
   unhideCell(xAxis: number, yAxis: number): void;
   changeFlagState(xAxis: number, yAxis: number): void;
   isSafe(): boolean;

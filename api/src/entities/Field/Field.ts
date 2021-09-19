@@ -19,7 +19,7 @@ export class Field implements FieldInterface {
   private numberOfFlaggedBombs: number;
   private numberOfHiddenCells: number;
   private filled: boolean;
-  private state: "safe" | "risk" | "exploded";
+  private exploded: boolean;
 
   readonly MIN_WIDTH = 5;
   readonly MIN_HEIGHT = 5;
@@ -35,13 +35,13 @@ export class Field implements FieldInterface {
     this.numberOfBombs = Math.ceil(
       (this.numberOfHiddenCells * bombsPercentage) / 100
     );
+    this.exploded = false;
     this.width = width;
     this.height = height;
     this.numberOfFlags = 0;
     this.numberOfFlaggedBombs = 0;
     this.cells = this.makeField();
     this.filled = false;
-    this.state = "risk";
   }
 
   private validateConstructorParameters(
@@ -95,7 +95,19 @@ export class Field implements FieldInterface {
   }
 
   public getState(): string {
-    return this.state;
+    let state = "risk";
+
+    if (this.exploded) {
+      state = "exploded";
+    } else {
+      if (
+        this.numberOfBombs === this.numberOfFlaggedBombs ||
+        this.numberOfBombs === this.numberOfHiddenCells
+      ) {
+        state = "safe";
+      }
+    }
+    return state;
   }
 
   public getNumberOfBombs(): number {
@@ -106,8 +118,12 @@ export class Field implements FieldInterface {
     return this.numberOfFlags;
   }
 
+  public getNumberOfHiddenCells(): number {
+    return this.numberOfHiddenCells;
+  }
+
   public unhideCell(xAxis: number, yAxis: number): void {
-    if (this.state !== "exploded") {
+    if (!this.exploded) {
       if (this.areCoordinatesValid(xAxis, yAxis)) {
         const cell = this.getCell(xAxis, yAxis);
 
@@ -118,7 +134,7 @@ export class Field implements FieldInterface {
           }
 
           if (cell.getContentType() === "bomb") {
-            this.state = "exploded";
+            this.exploded = true;
           }
 
           this.recursiveUnhideCell(xAxis, yAxis);
@@ -126,14 +142,7 @@ export class Field implements FieldInterface {
           this.unHideCellNeighbors(xAxis, yAxis);
         }
 
-        if (
-          this.numberOfBombs === this.numberOfHiddenCells ||
-          this.numberOfFlaggedBombs === this.numberOfBombs
-        ) {
-          this.state = "safe";
-        }
-
-        if (this.state === "exploded") {
+        if (this.exploded) {
           this.unHideBombs();
         }
       } else {
@@ -146,6 +155,9 @@ export class Field implements FieldInterface {
     const cell = this.getCell(xAxis, yAxis);
 
     if (cell.getBombFlagState() !== 0) {
+      if (cell.getBombFlagState() === 1) {
+        this.numberOfFlags--;
+      }
       cell.changeBombFlagState(0);
     }
 
@@ -166,8 +178,7 @@ export class Field implements FieldInterface {
     }
   }
 
-  private unHideCellNeighbors(xAxis: number, yAxis: number): string {
-    let action = "nothing";
+  private unHideCellNeighbors(xAxis: number, yAxis: number): void {
     const cell = this.getCell(xAxis, yAxis);
 
     if (
@@ -203,7 +214,7 @@ export class Field implements FieldInterface {
                 neighborCell.getContentType() === "bomb" &&
                 !neighborCell.hasBombFlag()
               ) {
-                this.state = "exploded";
+                this.exploded = true;
               }
 
               if (
@@ -216,18 +227,17 @@ export class Field implements FieldInterface {
                 !neighborCell.hasBombFlag()
               ) {
                 neighborCell.unHide();
+                this.numberOfHiddenCells--;
               }
             }
           }
         }
       }
     }
-
-    return action;
   }
 
   public changeFlagState(xAxis: number, yAxis: number): void {
-    if (this.state !== "exploded") {
+    if (!this.exploded) {
       if (this.areCoordinatesValid(xAxis, yAxis)) {
         const cell = this.getCell(xAxis, yAxis);
         if (cell.isHidden()) {
@@ -238,12 +248,6 @@ export class Field implements FieldInterface {
             this.numberOfFlags++;
             if (cell.getContentType() === "bomb") {
               this.numberOfFlaggedBombs++;
-              if (
-                this.numberOfBombs === this.numberOfHiddenCells ||
-                this.numberOfFlaggedBombs === this.numberOfBombs
-              ) {
-                this.state = "safe";
-              }
             }
           } else {
             if (forwardState === 2) {
@@ -251,9 +255,6 @@ export class Field implements FieldInterface {
             }
             if (cell.getContentType() === "bomb") {
               this.numberOfFlaggedBombs--;
-              if (this.isSafe()) {
-                this.state = "risk";
-              }
             }
           }
         }
@@ -262,7 +263,10 @@ export class Field implements FieldInterface {
   }
 
   public isSafe(): boolean {
-    return this.state === "safe";
+    return (
+      this.numberOfBombs === this.numberOfFlaggedBombs ||
+      this.numberOfBombs === this.numberOfHiddenCells
+    );
   }
 
   private canPutBomb(
@@ -398,8 +402,23 @@ export class Field implements FieldInterface {
     for (let line of this.cells) {
       for (let cell of line) {
         if (cell.isHidden() && cell.getContentType() === "bomb") {
+          if (cell.getBombFlagState() === 1) {
+            this.numberOfFlags--;
+          }
           cell.changeBombFlagState(0);
           cell.unHide();
+        }
+      }
+    }
+  }
+
+  private makeSafe(): void {
+    for (let line of this.cells) {
+      for (let cell of line) {
+        if (cell.isHidden() && cell.getContentType() !== "bomb") {
+          cell.changeBombFlagState(0);
+          cell.unHide();
+          this.numberOfHiddenCells--;
         }
       }
     }

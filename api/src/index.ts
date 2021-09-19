@@ -37,9 +37,15 @@ const io = new Server(httpServer, {
 io.on("connection", (socket: Socket) => {
   console.log(`Player ${socket.id} connected!`);
 
-  const game = initiateGameController.handle(socket.id);
+  let game = initiateGameController.handle(socket.id);
+  const numberOfBombs = game.getNumberOfBombs();
+  const numberOfFlags = game.getNumberOfFlags();
 
-  socket.emit("initiateGameState", game.getFieldState());
+  socket.emit("initiateGameState", {
+    field: game.getFieldState(),
+    numberOfBombs,
+    numberOfFlags,
+  });
 
   socket.on("unhideCell", (coordinates: CoordinatesInterface) => {
     const state = unhideCellController.handle(
@@ -47,8 +53,13 @@ io.on("connection", (socket: Socket) => {
       coordinates.yAxis,
       game
     );
-
-    socket.emit("updateGameState", state);
+    const numberOfBombs = game.getNumberOfBombs();
+    const numberOfFlags = game.getNumberOfFlags();
+    socket.emit("updateGameState", {
+      field: state,
+      numberOfBombs,
+      numberOfFlags,
+    });
 
     if (game.getGameState() === "exploded") {
       socket.emit("exploded");
@@ -57,13 +68,35 @@ io.on("connection", (socket: Socket) => {
     }
   });
 
+  socket.on("resetGame", () => {
+    game = initiateGameController.handle(socket.id);
+    const numberOfBombs = game.getNumberOfBombs();
+    const numberOfFlags = game.getNumberOfFlags();
+    socket.emit("resetGameState", {
+      field: game.getFieldState(),
+      numberOfBombs,
+      numberOfFlags,
+    });
+  });
+
   socket.on("changeBombFlagState", (coordinates: CoordinatesInterface) => {
     const state = changeBombFlagStateController.handle(
       coordinates.xAxis,
       coordinates.yAxis,
       game
     );
-    socket.emit("updateGameState", state);
+    const numberOfBombs = game.getNumberOfBombs();
+    const numberOfFlags = game.getNumberOfFlags();
+
+    socket.emit("updateGameState", {
+      field: state,
+      numberOfBombs,
+      numberOfFlags,
+    });
+
+    if (game.getGameState() === "safe") {
+      socket.emit("safe");
+    }
   });
 
   socket.on("disconnect", () => {
