@@ -2,7 +2,6 @@ import styled from "styled-components";
 import { CellProps, FieldContainerProps } from "./PropsInterface";
 
 export const FieldContainer = styled.div<FieldContainerProps>`
-  border: 1px solid black;
   border-radius: 5px;
   width: 90vh;
   height: 90vh;
@@ -38,6 +37,7 @@ export const CellContentImg = styled.img`
 
 export const Cell = styled.div<CellProps>`
   border-radius: 3px;
+  box-shadow: 0px 0px 2px black;
   display: grid;
   place-items: center;
   background-color: ${(props) => props.backgroundColor || "#ffffff"};

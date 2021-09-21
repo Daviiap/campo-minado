@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import { FieldProps } from "./PropsInterface";
 
 import { Colors } from "./ColorsEnum";
@@ -17,6 +17,8 @@ import flag from "../../assets/flag.svg";
 import bomb from "../../assets/bomb.svg";
 import flagP from "../../assets/flagP.svg";
 import { Socket } from "socket.io-client";
+import Exploded from "../Exploded";
+import Safe from "../Safe";
 
 const getNumber = (cell: string) => {
   if (`number${cell}` === "number1") {
@@ -97,30 +99,49 @@ const handleLeftClick = (
 };
 
 export const Field: React.FC<FieldProps> = ({ data, socketConnection }) => {
-  useEffect(() => { }, [data]);
+  const [exploded, setExploded] = useState(false);
+  const [isSafe, setIsSafe] = useState(false);
+
+  useEffect(() => {
+    if (socketConnection) {
+      socketConnection.on("exploded", () => {
+        setExploded(true);
+      });
+      socketConnection.on("safe", () => {
+        setIsSafe(true);
+      });
+    }
+
+    setExploded(false);
+    setIsSafe(false);
+  }, [data, socketConnection]);
 
   return (
-    <FieldContainer numberOfRows={data[0]?.length} numberOfColumns={data.length} onContextMenu={(e) => e.preventDefault()}>
+    <FieldContainer
+      numberOfRows={data[0]?.length}
+      numberOfColumns={data.length}
+      onContextMenu={(e) => e.preventDefault()}
+    >
+      {exploded ? <Exploded /> : null}
+      {isSafe ? <Safe /> : null}
       {data.map((line, i) => {
-        return (
-          line.map((cell, j) => {
-            const cellBackground = getCellBackground(cell);
-            return (
-              <Cell
-                onContextMenu={() => {
-                  handleRightClick(socketConnection, i, j);
-                }}
-                onClick={() => {
-                  handleLeftClick(socketConnection, i, j);
-                }}
-                backgroundColor={cellBackground}
-                key={j}
-              >
-                {getCellContent(cell)}
-              </Cell>
-            );
-          })
-        );
+        return line.map((cell, j) => {
+          const cellBackground = getCellBackground(cell);
+          return (
+            <Cell
+              onContextMenu={() => {
+                handleRightClick(socketConnection, i, j);
+              }}
+              onClick={() => {
+                handleLeftClick(socketConnection, i, j);
+              }}
+              backgroundColor={cellBackground}
+              key={j}
+            >
+              {getCellContent(cell)}
+            </Cell>
+          );
+        });
       })}
     </FieldContainer>
   );

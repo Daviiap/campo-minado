@@ -1,6 +1,13 @@
-*, body {
+*,
+body {
   margin: 0px;
   padding: 0px;
   box-sizing: border-box;
   font-family: "Gluten", cursive;
+}
+
+body {
+  background-color: #454545;
+  min-height: 100vh;
+  min-width: 100vw;
 }
