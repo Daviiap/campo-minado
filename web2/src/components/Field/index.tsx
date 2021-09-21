@@ -3,7 +3,7 @@ import { FieldProps } from "./PropsInterface";
 
 import { Colors } from "./ColorsEnum";
 
-import { Cell, FieldContainer, Line, CellContentImg } from "./styles";
+import { Cell, FieldContainer, CellContentImg } from "./styles";
 
 import number1 from "../../assets/1.svg";
 import number2 from "../../assets/2.svg";
@@ -97,31 +97,29 @@ const handleLeftClick = (
 };
 
 export const Field: React.FC<FieldProps> = ({ data, socketConnection }) => {
-  useEffect(() => {}, [data]);
+  useEffect(() => { }, [data]);
 
   return (
-    <FieldContainer onContextMenu={(e) => e.preventDefault()}>
+    <FieldContainer numberOfRows={data[0]?.length} numberOfColumns={data.length} onContextMenu={(e) => e.preventDefault()}>
       {data.map((line, i) => {
         return (
-          <Line key={i}>
-            {line.map((cell, j) => {
-              const cellBackground = getCellBackground(cell);
-              return (
-                <Cell
-                  onContextMenu={() => {
-                    handleRightClick(socketConnection, i, j);
-                  }}
-                  onClick={() => {
-                    handleLeftClick(socketConnection, i, j);
-                  }}
-                  backgroundColor={cellBackground}
-                  key={j}
-                >
-                  {getCellContent(cell)}
-                </Cell>
-              );
-            })}
-          </Line>
+          line.map((cell, j) => {
+            const cellBackground = getCellBackground(cell);
+            return (
+              <Cell
+                onContextMenu={() => {
+                  handleRightClick(socketConnection, i, j);
+                }}
+                onClick={() => {
+                  handleLeftClick(socketConnection, i, j);
+                }}
+                backgroundColor={cellBackground}
+                key={j}
+              >
+                {getCellContent(cell)}
+              </Cell>
+            );
+          })
         );
       })}
     </FieldContainer>

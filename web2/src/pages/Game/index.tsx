@@ -12,12 +12,14 @@ export const Game: React.FC = () => {
   const [startClock, setStartClock] = useState(false);
   const [numberOfBombs, setNumberOfBombs] = useState(0);
   const [numberOfFlags, setNumberOfFlags] = useState(0);
+  const [exploded, setExploded] = useState(false);
+  const [isSafe, setIsSafe] = useState(false);
 
   useEffect(() => {
     setSocket(io("http://localhost:3000/"));
   }, []);
 
-  useEffect(() => {}, [startClock]);
+  useEffect(() => { }, [startClock]);
 
   useEffect(() => {
     if (socket) {
@@ -56,7 +58,15 @@ export const Game: React.FC = () => {
   return (
     <Container>
       <div></div>
-      <Field socketConnection={socket} data={field} />
+      {
+        exploded ?
+          <div>exploded</div>
+          :
+          isSafe ?
+            <div>Safe</div>
+            :
+            <Field socketConnection={socket} data={field} />
+      }
       <SideBoard
         numberOfBombs={numberOfBombs}
         numberOfFlags={numberOfFlags}
