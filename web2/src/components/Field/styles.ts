@@ -13,7 +13,6 @@ export const FieldContainer = styled.div<FieldContainerProps>`
     for (let _ = 0; _ < props.numberOfColumns; _++) {
       frs += '1fr ';
     }
-    console.log(frs);
 
     return frs;
   }};
@@ -22,7 +21,6 @@ export const FieldContainer = styled.div<FieldContainerProps>`
     for (let _ = 0; _ < props.numberOfRows; _++) {
       frs += '1fr ';
     }
-    console.log(frs);
 
     return frs;
   }};

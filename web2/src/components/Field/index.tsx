@@ -132,7 +132,7 @@ export const Field: React.FC<FieldProps> = ({ data, socketConnection }) => {
               onContextMenu={() => {
                 handleRightClick(socketConnection, i, j);
               }}
-              onClick={() => {
+              onClick={(e) => {
                 handleLeftClick(socketConnection, i, j);
               }}
               backgroundColor={cellBackground}
