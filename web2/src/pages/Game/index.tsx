@@ -5,7 +5,6 @@ import { io, Socket } from "socket.io-client";
 
 import { Container } from "./styles";
 import SideBoard from "../../components/SideBoard";
-import Exploded from "../../components/Exploded";
 
 export const Game: React.FC = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -41,6 +40,12 @@ export const Game: React.FC = () => {
           setStartClock(false);
           setField(gameState.field);
         });
+        socket.on("exploded", () => {
+          setStartClock(false);
+        })
+        socket.on("exploded", () => {
+          setStartClock(false);
+        })
       });
     }
   }, [socket, field, startClock]);
